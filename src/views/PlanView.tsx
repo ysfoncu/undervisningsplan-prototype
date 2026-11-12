@@ -11,17 +11,18 @@ import { People } from "../components/People";
 import { Avatar, Dialog, Drawer, Icon, StatusChip } from "../components/ui";
 import { ObserveTab } from "./ObserveView";
 import { nextAction } from "../next";
+import { TEMPLATES } from "../data";
 import { CompletedView } from "./CompletedView";
 import { MetaRow, TitleField } from "../components/PlanMeta";
 
 type Tab = "plan" | "observe";
 
 export function PlanView({ planId, back }: { planId: string; back: () => void }) {
-  const { state, me, markSeen } = useStore();
+  const { state, me, markSeen, deletePlan, showToast } = useStore();
   const plan = state.plans.find((p) => p.id === planId);
   const access = plan ? accessOf(plan, me.id) : null;
   const [tab, setTab] = useState<Tab>(() => (plan && plan.phase !== "plan" ? "observe" : "plan"));
-  const [overlay, setOverlay] = useState<"share" | "history" | null>(null);
+  const [overlay, setOverlay] = useState<"share" | "history" | "delete" | null>(null);
 
   useEffect(() => {
     if (plan && access && access !== "owner") markSeen(plan.id);
@@ -83,6 +84,28 @@ export function PlanView({ planId, back }: { planId: string; back: () => void })
           <People plan={plan} editable={access === "owner" && plan.phase !== "done"} />
         </Dialog>
       )}
+      {overlay === "delete" && (
+        <Dialog title={fill(L.deleteTitle, { title: plan.info.title.trim() || L.untitled })} onClose={() => setOverlay(null)}>
+          <p>{L.deleteBody}</p>
+          {plan.observations.some((o) => !o.endedAt) && <p className="banner banner-yellow small">{L.deleteLive}</p>}
+          <div className="row dialog-actions">
+            <button
+              className="btn btn-danger"
+              onClick={() => {
+                const title = plan.info.title.trim() || L.untitled;
+                deletePlan(plan.id);
+                showToast(fill(L.deleted, { title }));
+                back();
+              }}
+            >
+              {L.deleteConfirm}
+            </button>
+            <button className="btn" autoFocus onClick={() => setOverlay(null)}>
+              {L.deleteCancel}
+            </button>
+          </div>
+        </Dialog>
+      )}
       {overlay === "history" && (
         <Drawer title={L.history} onClose={() => setOverlay(null)}>
           <History plan={plan} />
@@ -108,6 +131,33 @@ export function PlanView({ planId, back }: { planId: string; back: () => void })
           {tab === "plan" ? <PlanTab plan={plan} /> : <ObserveTab plan={plan} />}
         </>
       )}
+    </div>
+  );
+}
+
+// ─── Template picker ────────────────────────────────────────────────────────
+
+/** Shown to the owner on a new plan: two templates or a blank page. */
+function TemplatePicker({ plan }: { plan: Plan }) {
+  const { chooseTemplate } = useStore();
+  return (
+    <div className="tpl-picker">
+      <h4>{L.tplTitle}</h4>
+      <p className="muted small">{L.tplIntro}</p>
+      <div className="tpl-grid">
+        {TEMPLATES.map((t) => (
+          <button key={t.id} className="tpl-card" onClick={() => chooseTemplate(plan.id, t.id)}>
+            <span className="tpl-name">{L.templates[t.id].name}</span>
+            <span className="tpl-desc">{L.templates[t.id].desc}</span>
+            <span className="tpl-cta">{L.tplUse} →</span>
+          </button>
+        ))}
+        <button className="tpl-card tpl-empty" onClick={() => chooseTemplate(plan.id, null)}>
+          <span className="tpl-name">{L.tplEmpty}</span>
+          <span className="tpl-desc">{L.tplEmptyDesc}</span>
+          <span className="tpl-cta">{L.tplUseEmpty} →</span>
+        </button>
+      </div>
     </div>
   );
 }
@@ -175,19 +225,27 @@ function PlanTab({ plan }: { plan: Plan }) {
   return (
     <div className="two-col">
       <div className="col-main">
-        <section className="card plan-doc" aria-labelledby="sec-plan">
-          <div className="plan-doc-head">
-            <h3 id="sec-plan">{L.secPlan}</h3>
-            <span className="muted small plan-doc-state">
-              {canEdit ? L.liveSaved : L.liveReadOnly}
-            </span>
-          </div>
+        <section className="card plan-doc" aria-labelledby={plan.templatePending ? undefined : "sec-plan"} aria-label={plan.templatePending ? L.secPlan : undefined}>
+          {/* Until a template is chosen there is no document yet: no heading or save note. */}
+          {!plan.templatePending && (
+            <div className="plan-doc-head">
+              <h3 id="sec-plan">{L.secPlan}</h3>
+              <span className="muted small plan-doc-state">
+                {canEdit ? L.liveSaved : L.liveReadOnly}
+              </span>
+            </div>
+          )}
           {editingNow.length > 0 && (
             <p className="live-banner small">
               <span className="live-dot" aria-hidden="true" />
               {fill(editingNow.length === 1 ? L.liveWritingOne : L.liveWritingMany, { names: editingNow.map((p) => p.name.split(" ")[0]).join(", ") })}
             </p>
           )}
+          {plan.templatePending && access === "owner" ? (
+            <TemplatePicker plan={plan} />
+          ) : plan.templatePending ? (
+            <p className="empty">{L.tplWaiting}</p>
+          ) : (
           <PlanEditor
             key={`${me.id}-${canEdit}`}
             ref={editorRef}
@@ -205,6 +263,7 @@ function PlanTab({ plan }: { plan: Plan }) {
             }}
             toast={showToast}
           />
+          )}
         </section>
       </div>
       <aside className="col-side">
@@ -247,7 +306,7 @@ function History({ plan }: { plan: Plan }) {
 
 // ─── Header actions (Google Docs style) ─────────────────────────────────────
 
-function HeadActions({ plan, isOwner, open }: { plan: Plan; isOwner: boolean; open: (o: "share" | "history") => void }) {
+function HeadActions({ plan, isOwner, open }: { plan: Plan; isOwner: boolean; open: (o: "share" | "history" | "delete") => void }) {
   const { user, me } = useStore();
   const people = plan.participants.map((p) => user(p.userId));
   // Who has the plan open in another tab right now (one avatar per person).
@@ -274,6 +333,11 @@ function HeadActions({ plan, isOwner, open }: { plan: Plan; isOwner: boolean; op
       <button className="icon-round" onClick={() => open("history")} aria-label={L.openHistory} title={L.openHistory}>
         <Icon name="history" />
       </button>
+      {isOwner && (
+        <button className="icon-round icon-danger" onClick={() => open("delete")} aria-label={L.deletePlan} title={L.deletePlan}>
+          <Icon name="trash" />
+        </button>
+      )}
       {isOwner ? (
         <button
           className="btn btn-primary btn-share"

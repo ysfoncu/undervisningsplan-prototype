@@ -240,13 +240,22 @@ export function createProvider(id: string, yjsDocMap: Map<string, Y.Doc>): Provi
   return provider as unknown as Provider;
 }
 
-// Plans created in this tab start from the plan template (see PLAN_TEMPLATE).
-const newPlans = new Set<string>();
-export function markNewPlan(id: string) {
-  newPlans.add(id);
+// The template the owner picked for a new plan in this tab; the editor seeds the
+// empty document with it once (see TEMPLATES in data.ts).
+const chosenTemplates = new Map<string, string>();
+export function setStartTemplate(id: string, docJson: string) {
+  chosenTemplates.set(id, docJson);
 }
-export function isNewPlan(id: string): boolean {
-  return newPlans.has(id);
+export function getStartTemplate(id: string): string | undefined {
+  return chosenTemplates.get(id);
+}
+/** Forget a deleted plan's document. */
+export function deleteDoc(id: string) {
+  try {
+    localStorage.removeItem(DOC_KEY(id));
+  } catch {
+    /* ignore */
+  }
 }
 
 /** True if this tab may seed the Lexical root (no stored copy existed). */

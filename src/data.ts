@@ -30,11 +30,8 @@ const doc = (...c: J[]) => JSON.stringify({ root: el("root", c) });
 export const GUIDANCE_COLOR = "#6b778c";
 const g = (text: string): J => ({ ...t(text, I), style: `color: ${GUIDANCE_COLOR};` });
 
-/**
- * Starting text of every new plan: the usual parts of a lesson plan with a
- * short prompt under each. The student writes over the prompts.
- */
-export const PLAN_TEMPLATE = doc(
+/** "Enkel plan": the usual parts of a lesson plan with a short prompt under each. */
+const SIMPLE_TEMPLATE = doc(
   h("Mål for timen"),
   p(g("Hva skal elevene kunne eller forstå etter timen?")),
   h("Gjennomføring"),
@@ -49,12 +46,47 @@ export const PLAN_TEMPLATE = doc(
   list("bullet", [{ c: [g("Hva vil du ha tilbakemelding på?")] }]),
 );
 
+/** "Utvidet plan": goals with success criteria, adapted teaching, assessment and reflection. */
+const EXTENDED_TEMPLATE = doc(
+  h("Mål og kriterier"),
+  p(t("Læringsmål:", B), t(" "), g("Hva skal elevene lære i denne timen?")),
+  p(t("Kriterier for måloppnåelse:", B), t(" "), g("Hvordan ser du at et mål er nådd?")),
+  h("Før timen"),
+  p(g("Hva kan elevene fra før, og hvordan bygger timen videre på det?")),
+  h("Gjennomføring"),
+  list("number", [
+    { c: [t("Introduksjon (… min):", B), t(" "), g("Hvordan presenterer du målet og vekker nysgjerrighet?")] },
+    { c: [t("Utforsking (… min):", B), t(" "), g("Hvilke oppgaver jobber elevene med, alene eller sammen?")] },
+    { c: [t("Oppsummering (… min):", B), t(" "), g("Hvordan samler du trådene?")] },
+  ]),
+  h("Tilpasset opplæring"),
+  p(g("Hvordan møter du elever som trenger mer støtte eller flere utfordringer?")),
+  h("Vurdering underveis"),
+  p(g("Hvordan sjekker du forståelse i løpet av timen?")),
+  h("Observatørene kan se etter"),
+  list("bullet", [{ c: [g("Hva vil du ha tilbakemelding på?")] }]),
+  h("Refleksjon etter timen"),
+  p(g("Hva fungerte, og hva ville du gjort annerledes? Fyll ut etter timen.")),
+);
+
+export type TemplateId = "simple" | "extended";
+
+/** The templates offered when a plan is created (plus "Tom plan"). */
+export const TEMPLATES: { id: TemplateId; doc: string; headings: string[] }[] = [
+  { id: "simple", doc: SIMPLE_TEMPLATE, headings: ["Mål for timen", "Gjennomføring", "Utstyr", "Observatørene kan se etter"] },
+  {
+    id: "extended",
+    doc: EXTENDED_TEMPLATE,
+    headings: ["Mål og kriterier", "Før timen", "Gjennomføring", "Tilpasset opplæring", "Vurdering underveis", "Observatørene kan se etter", "Refleksjon etter timen"],
+  },
+];
+
 /** The prompt texts, so the editor can tell an untouched prompt from typed text. */
 export const TEMPLATE_PROMPTS = new Set<string>(
   (function collect(n: J): string[] {
     const own = n.type === "text" && typeof n.style === "string" && n.style.includes(GUIDANCE_COLOR) ? [n.text as string] : [];
     return own.concat(((n.children as J[]) ?? []).flatMap(collect));
-  })(JSON.parse(PLAN_TEMPLATE).root),
+  })({ children: TEMPLATES.map((x) => JSON.parse(x.doc).root) }),
 );
 
 export function seed(): State {

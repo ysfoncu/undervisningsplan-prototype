@@ -144,6 +144,8 @@ export interface Plan {
   createdAt: string;
   updatedAt: string;
   doneAt: string | null;
+  /** New plan: the owner has not yet chosen a template (or "Tom plan"). */
+  templatePending?: boolean;
   /** The student's closing comment, written when marking the plan as completed. */
   finalNote?: { text: string; at: string } | null;
 }

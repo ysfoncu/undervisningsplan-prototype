@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
-import { isResetting, markNewPlan, resetAll } from "./collab";
-import { seed } from "./data";
+import { deleteDoc, isResetting, resetAll, setStartTemplate } from "./collab";
+import { seed, TEMPLATES, type TemplateId } from "./data";
 import { fmtOffset, nowIso, uid } from "./format";
 import { fill, L } from "./labels";
 import type { Access, MediaRef, Note, NoteKind, Plan, PlanInfo, State, User } from "./types";
@@ -35,7 +35,7 @@ function persist(s: State) {
 }
 
 // ─── Reducer ────────────────────────────────────────────────────────────────
-type Action = { type: "reset" } | { type: "replace"; state: State } | { type: "createPlan"; plan: Plan } | { type: "updatePlan"; id: string; fn: (p: Plan) => Plan };
+type Action = { type: "reset" } | { type: "replace"; state: State } | { type: "createPlan"; plan: Plan } | { type: "deletePlan"; id: string } | { type: "updatePlan"; id: string; fn: (p: Plan) => Plan };
 
 function reducer(state: State, a: Action): State {
   switch (a.type) {
@@ -45,6 +45,8 @@ function reducer(state: State, a: Action): State {
       return a.state;
     case "createPlan":
       return { ...state, plans: [a.plan, ...state.plans] };
+    case "deletePlan":
+      return { ...state, plans: state.plans.filter((p) => p.id !== a.id) };
     case "updatePlan":
       return { ...state, plans: state.plans.map((p) => (p.id === a.id ? { ...a.fn(p), updatedAt: nowIso() } : p)) };
   }
@@ -116,6 +118,10 @@ interface Store {
   showToast: (msg: string) => void;
   reset: () => void;
   createPlan: () => string;
+  /** Owner picks the starting text of a new plan: a template, or null for "Tom plan". */
+  chooseTemplate: (planId: string, templateId: TemplateId | null) => void;
+  /** Owner only: removes the plan, its document and its photos for everyone. */
+  deletePlan: (planId: string) => void;
   saveInfo: (planId: string, info: PlanInfo) => void;
   /** The tab that edited reports plain text + open-annotation count; logs one "edited" line per person per session. */
   saveBody: (planId: string, text: string, openCount: number) => void;
@@ -208,7 +214,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       reset: () => resetAll(),
       createPlan: () => {
         const id = "p-" + uid();
-        markNewPlan(id);
         const t = nowIso();
         dispatch({
           type: "createPlan",
@@ -228,9 +233,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             createdAt: t,
             updatedAt: t,
             doneAt: null,
+            templatePending: true,
           },
         });
         return id;
+      },
+      chooseTemplate: (planId, templateId) => {
+        const t = TEMPLATES.find((x) => x.id === templateId);
+        if (t) setStartTemplate(planId, t.doc);
+        upd(planId, (p) => (p.templatePending ? logged({ ...p, templatePending: false }, t ? fill(L.hTemplate, { name: L.templates[t.id].name }) : L.hNoTemplate) : p));
+      },
+      deletePlan: (planId) => {
+        const p = state.plans.find((x) => x.id === planId);
+        if (!p || p.ownerId !== me.id) return;
+        p.observations.flatMap((o) => o.notes).flatMap((n) => n.media ?? []).forEach((m) => void deleteMedia(m.id));
+        deleteDoc(planId);
+        dispatch({ type: "deletePlan", id: planId });
       },
       saveInfo: (planId, info) => upd(planId, (p) => ({ ...p, info })),
       saveBody: (planId, text, openCount) =>

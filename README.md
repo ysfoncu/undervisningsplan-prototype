@@ -70,8 +70,9 @@ never appears in the invite list.
 ## Demo script (≈ 5 minutes)
 
 1.  **Ingrid → "+ Ny plan".** Type the title at the top, click *+ Fag* /
-    *+ Klasse* / *+ Dato og tid* to fill in details, write the plan (it starts
-    from a short template; click a grey prompt and type over it). Everything
+    *+ Klasse* / *+ Dato og tid* to fill in details, choose a template
+    (*Enkel plan*, *Utvidet plan* or *Tom plan*) and write the plan (click a
+    grey prompt and type over it). The bin icon deletes the plan. Everything
     saves as you type. **Del** (top right) shares it (a plan needs a name first; the dialog asks
     for it. Date and time are optional): each person in the practice group has
     an access menu ("Velg tilgang": *Leser*, *Redaktør* or *Observatør*,
