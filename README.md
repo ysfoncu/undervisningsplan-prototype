@@ -45,8 +45,8 @@ marks the plan as completed; every edit is in Historikk. No approval step.
 
 1.  Open http://localhost:5199 in **two browser tabs**.
 2.  In tab 1 choose **Ingrid** ("Vis som" is per tab), click **+ Ny plan**,
-    and give it a name. **Del** → invite Jonas as
-    *Redaktør*. In tab 2 choose **Jonas** and open the plan.
+    and give it a name. **Del** → choose *Redaktør* next to
+    Jonas → **Inviter**. In tab 2 choose **Jonas** and open the plan.
 3.  Type in either tab: the text, coloured cursors with names, and the
     "I planen nå" avatars update in the other tab at once.
 4.  Select a few words → the small menu offers *Uthev / Stryk / Erstatt
@@ -72,8 +72,10 @@ never appears in the invite list.
 1.  **Ingrid → "+ Ny plan".** Type the title at the top, click *+ Fag* /
     *+ Klasse* / *+ Dato og tid* to fill in details, write the plan (it starts
     from a short template; click a grey prompt and type over it). Everything
-    saves as you type. **Del** (top right) invites people (a plan needs a name first; the dialog asks for it. Date and time are optional) as *Leser*,
-    *Redaktør* or *Observatør*; the clock icon opens **Historikk**.
+    saves as you type. **Del** (top right) shares it (a plan needs a name first; the dialog asks
+    for it. Date and time are optional): each person in the practice group has
+    an access menu ("Velg tilgang": *Leser*, *Redaktør* or *Observatør*,
+    with a suggestion marked) and an **Inviter** button; the clock icon opens **Historikk**.
 2.  **Jonas** (second tab) opens the plan and writes in it while
     Ingrid writes too. He selects a phrase and adds a *Stryk* with a note.
 3.  **Ingrid** clicks the card to find the text, then **Godta** or **Avvis**.

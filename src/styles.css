@@ -687,3 +687,32 @@ label.btn { cursor: pointer; }
 @media (max-width: 520px) { .rights-table td { width: 44px; } .rights-table thead th { font-size: 10px; } }
 .rights-table .is-focus { background: var(--blue-bg); }
 .rights-table thead th.is-focus { color: var(--blue-dark); }
+
+/* Share dialog: search, "Har tilgang", "Inviter fra …", access menus */
+.share-panel { gap: 14px; }
+.share-search { width: 100%; padding: 9px 12px; font-size: 14px; border: 2px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+.share-search:focus { border-color: #4c9aff; outline: none; }
+.share-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; }
+.share-row { display: flex; align-items: center; gap: 8px; padding: 8px 4px; border-bottom: 1px solid #f4f5f7; }
+.share-row:last-child { border-bottom: 0; }
+.share-row > .person { flex: 1 1 auto; min-width: 0; }
+.share-owner { font-size: 13px; color: var(--muted); padding: 0 8px; }
+.share-invite-btn { flex: none; }
+.access-menu { position: relative; flex: none; }
+.access-btn { display: inline-flex; align-items: center; gap: 4px; font: inherit; font-size: 13px; font-weight: 500; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: #fff; color: var(--text); cursor: pointer; white-space: nowrap; }
+.access-btn:hover { background: #f4f5f7; }
+.access-btn span { color: var(--muted); font-size: 10px; }
+.access-pop { position: fixed; z-index: 70; width: 280px; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(9, 30, 66, 0.2); padding: 4px; display: flex; flex-direction: column; }
+.access-opt { display: flex; gap: 8px; align-items: flex-start; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 6px; cursor: pointer; font: inherit; color: var(--text); }
+.access-opt:hover { background: #f4f5f7; }
+.access-opt.is-on { background: var(--blue-bg); }
+.access-check { width: 14px; flex: none; color: var(--blue); font-weight: 700; }
+.access-opt-name { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; }
+.access-opt-desc { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.35; }
+.access-suggest { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--green); background: var(--green-bg); padding: 1px 5px; border-radius: 3px; }
+.access-remove { color: var(--red); border-top: 1px solid var(--border); border-radius: 0 0 6px 6px; margin-top: 4px; font-size: 13px; }
+.access-remove:hover { background: var(--red-bg); }
+@media (max-width: 520px) { .share-row { flex-wrap: wrap; } .share-row > .person { flex-basis: 100%; } .share-row .access-menu { margin-left: 36px; } .access-pop { width: 250px; } }
+.share-row .person-name { white-space: nowrap; margin-right: 6px; }
+.access-btn.is-empty { color: var(--muted); font-weight: 400; border-style: dashed; }
+.dialog:has(.share-panel) { max-width: 600px; }
