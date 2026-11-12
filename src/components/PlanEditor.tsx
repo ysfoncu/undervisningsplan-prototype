@@ -45,7 +45,7 @@ import { MarkNode, $isMarkNode, $unwrapMarkNode, $wrapSelectionInMarkNode } from
 import { $patchStyleText, $setBlocksType } from "@lexical/selection";
 import { $dfs, $findMatchingParent } from "@lexical/utils";
 import { createProvider, isNewPlan, mayBootstrap } from "../collab";
-import { GUIDANCE_COLOR, PLAN_TEMPLATE, SEED_DOCS, TEMPLATE_PROMPTS } from "../data";
+import { GUIDANCE_COLOR, PLAN_TEMPLATE, TEMPLATE_PROMPTS } from "../data";
 import { fill, L } from "../labels";
 import type { Annotation, AnnotationType, User } from "../types";
 import { ANN_COLOR } from "./annColors";
@@ -150,7 +150,7 @@ export const PlanEditor = forwardRef<
             id={props.planId}
             providerFactory={createProvider}
             shouldBootstrap={mayBootstrap(props.planId)}
-            initialEditorState={SEED_DOCS[props.planId]?.state ?? (isNewPlan(props.planId) ? PLAN_TEMPLATE : undefined)}
+            initialEditorState={isNewPlan(props.planId) ? PLAN_TEMPLATE : undefined}
             username={props.me.name}
             cursorColor={props.me.color}
             awarenessData={awarenessData}

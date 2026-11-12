@@ -3,7 +3,6 @@ import * as Y from "yjs";
 import { Awareness, applyAwarenessUpdate, encodeAwarenessUpdate, removeAwarenessStates } from "y-protocols/awareness";
 import type { Provider } from "@lexical/yjs";
 import type { Annotation } from "./types";
-import { SEED_DOCS } from "./data";
 import { clearMedia } from "./media";
 
 /**
@@ -122,13 +121,6 @@ export function getEntry(id: string): Entry {
   const channel = new BroadcastChannel(CHANNEL(id));
   const entry: Entry = { doc, awareness, channel, views: new Set(), fresh: !stored };
   entries.set(id, entry);
-
-  // Seed annotation records for demo plans. Y.Map keys merge, so two tabs
-  // seeding at once cannot duplicate them.
-  if (!stored && SEED_DOCS[id]) {
-    const map = doc.getMap<Annotation>("annotations");
-    doc.transact(() => SEED_DOCS[id].annotations.forEach((a) => map.set(a.id, a)), STORAGE);
-  }
 
   const post = (m: Msg) => channel.postMessage(m);
   let saveTimer = 0;

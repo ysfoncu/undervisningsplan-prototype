@@ -44,18 +44,20 @@ marks the plan as completed; every edit is in Historikk. No approval step.
 ## Try co-editing (two tabs = two people)
 
 1.  Open http://localhost:5199 in **two browser tabs**.
-2.  In tab 1 choose **Ingrid**, in tab 2 choose **Jonas** ("Vis som" is per
-    tab). Open *Brøk i hverdagen* in both.
+2.  In tab 1 choose **Ingrid** ("Vis som" is per tab), click **+ Ny plan**,
+    and give it a name, date and start time. **Del** → invite Jonas as
+    *Redaktør*. In tab 2 choose **Jonas** and open the plan.
 3.  Type in either tab: the text, coloured cursors with names, and the
     "I planen nå" avatars update in the other tab at once.
 4.  Select a few words → the small menu offers *Uthev / Stryk / Erstatt
     tekst*. The mark and its card appear in both tabs.
-5.  On Kari's *Erstatt tekst* card, click **Godta**: the text changes for
-    everyone and the card moves under **Vis løste**.
+5.  Make an *Erstatt tekst* suggestion in one tab and click **Godta** on its
+    card in the other: the text changes for everyone and the card moves
+    under **Vis løste**.
 
 ## Who you can be
 
-| Person | On "Brøk i hverdagen" | Can |
+| Person | Role in the demo (invite them with this access) | Can |
 |---|---|---|
 | Ingrid Haugen | Owner (student) | Write, annotate, resolve, comment, invite, read notes and feedback |
 | Jonas Berg | Redaktør | Write, annotate, resolve, comment |
@@ -72,7 +74,7 @@ never appears in the invite list.
     from a short template; click a grey prompt and type over it). Everything
     saves as you type. **Del** (top right) invites people (a plan needs a name, date and start time first; the dialog asks for what is missing) as *Leser*,
     *Redaktør* or *Observatør*; the clock icon opens **Historikk**.
-2.  **Jonas** (second tab) opens *Brøk i hverdagen* and writes in it while
+2.  **Jonas** (second tab) opens the plan and writes in it while
     Ingrid writes too. He selects a phrase and adds a *Stryk* with a note.
 3.  **Ingrid** clicks the card to find the text, then **Godta** or **Avvis**.
     She also adds her own *Uthev*. Comments go in the box at the bottom.
@@ -93,7 +95,8 @@ never appears in the invite list.
     the feedback with *Neste steg*, and the observation findings grouped by
     type. **Skriv ut / lagre som PDF** prints it.
 
-**↺ Tilbakestill demo** restores the seed data in every open tab.
+The prototype starts with no plans: every walkthrough begins with
+**+ Ny plan**. **↺ Tilbakestill demo** deletes all plans in every open tab.
 
 ## What changed compared with the current feature
 

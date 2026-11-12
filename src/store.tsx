@@ -8,11 +8,16 @@ import { deleteMedia } from "./media";
 
 export const STORAGE_KEY = "undervisningsplan-proto-v6";
 const ME_KEY = "undervisningsplan-proto-me";
+const EXAMPLE_IDS = ["p-brok", "p-dikt", "p-vann"];
 
 function load(): State {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as State;
+    if (raw) {
+      const s = JSON.parse(raw) as State;
+      // The example plans were removed from the prototype; drop stored copies.
+      return { ...s, plans: s.plans.filter((p) => !EXAMPLE_IDS.includes(p.id)) };
+    }
   } catch {
     /* storage blocked or corrupt: fall back to seed */
   }
