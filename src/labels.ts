@@ -15,9 +15,25 @@ export const L = {
   // Access an owner gives an invited person
   access: { leser: "Leser", redaktor: "Redaktør", observator: "Observatør" },
   accessHint: {
-    leser: "Kan lese planen og kommentarene",
-    redaktor: "Kan foreslå endringer med markeringer og kommentere",
-    observator: "Kan kommentere planen og observere timen",
+    leser: "Kan lese planen. Kan ikke skrive, markere eller kommentere i planen.",
+    redaktor: "Kan skrive i planen, markere tekst og kommentere. Kan ikke observere timen.",
+    observator: "Kan skrive i planen, markere og kommentere, observere timen og gi tilbakemelding.",
+  },
+  rights: {
+    title: "Hva kan de ulike tilgangene?",
+    yes: "Ja",
+    no: "Nei",
+    read: "Lese planen, markeringer og kommentarer",
+    write: "Skrive i planen",
+    annotate: "Markere tekst og kommentere planen",
+    resolve: "Godta eller avvise forslag",
+    observe: "Observere timen og skrive notater",
+    media: "Se bilder og video fra timen",
+    react: "Reagere på og kommentere observasjonsnotater",
+    feedback: "Skrive samlet tilbakemelding",
+    feedbackNote: "Én observatør skriver den, helst veilederen.",
+    manage: "Invitere, endre tilgang og markere som fullført",
+    after: "Alt låses når planen er markert som fullført.",
   },
   accessLabel: "Tilgang for {name}",
 
@@ -54,7 +70,6 @@ export const L = {
   // Next action (one line under each plan card)
   next: {
     studentDraft: "Skriv planen og del den med veileder og medstudenter.",
-    studentNeedsWhen: "Velg dato og tid for timen, skriv planen og del den med veileder og medstudenter.",
     studentOpen: "{n} åpne markeringer i planen.",
     studentOpenNone: "Planen er delt. Alle med redigeringstilgang kan skrive i den.",
     studentObserving: "Du blir observert. Notatene vises automatisk når observasjonen er avsluttet.",
@@ -62,6 +77,7 @@ export const L = {
     studentSummary: "Tilbakemeldingen er klar. Les den og marker planen som fullført.",
     editor: "Skriv i planen eller marker tekst og foreslå endringer.",
     observer: "Observer timen {when}.",
+    observerNoWhen: "Observer timen når den holdes.",
     observerLive: "Du observerer nå.",
     observerSummary: "Skriv gjerne en samlet tilbakemelding (valgfritt).",
     reader: "",
@@ -91,11 +107,13 @@ export const L = {
   fSubjectPh: "F.eks. Matematikk",
   fDate: "Dato",
   fTime: "Starttid",
-  fDuration: "Varighet (min)",
-  durationValue: "{n} min",
-  fDurationShort: "Varighet",
   fDateTime: "Dato og tid",
   metaEdit: "Endre {field}",
+  fMeeting: "Møtelenke",
+  fMeetingPh: "Lim inn lenke, f.eks. https://zoom.us/j/…",
+  meetingJoin: "{name}-møte",
+  meetingJoinTitle: "Åpne møtelenken i en ny fane",
+  meetingInvalid: "Ikke en gyldig lenke. Den må starte med https://",
 
   // Plan text (one input, like the inspiration repo)
   secPlan: "Planen",
@@ -176,11 +194,6 @@ export const L = {
   shareNeedsName: "Gi planen et navn før du deler den",
   shareNeedsNameHint: "Navnet er det de du inviterer ser i listen sin.",
   shareSaveName: "Lagre navn",
-  shareNeedsDetails: "Fyll inn før du deler planen",
-  shareNeedsDetailsHint: "De du inviterer ser navnet, datoen og tidspunktet i listen sin, og observatørene vet når de skal komme.",
-  shareNeedsWhen: "Velg dato og starttid før du deler planen",
-  shareNeedsWhenHint: "Observatørene må vite når timen er.",
-  shareSaveDetails: "Lagre og fortsett",
   peopleWithAccess: "Personer med tilgang",
   openHistory: "Historikk",
   // Right-hand feed (after the inspiration repo's "Annotations & comments")
@@ -243,10 +256,11 @@ export const L = {
 
   // Live observer
   live: "Live",
-  liveOf: "av {n} min",
-  liveNoDuration: "varighet ikke satt",
+  tpHours: "Timer",
+  tpMinutes: "Minutter",
+  tpNow: "Nå",
+  tpOk: "Ok",
   liveOvertime: "Over planlagt tid",
-  liveOvertimeBy: "+{t} over planlagt tid",
   demoForward: "Demo: +5 min",
   demoForwardHint: "Bare i prototypen: hopper 5 minutter frem i timen",
   notePh: "Hva ser du? Skriv kort.",

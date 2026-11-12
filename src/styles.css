@@ -217,13 +217,7 @@ main { padding: 24px 20px 80px; }
 .pulse, .live-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--red); margin-right: 4px; animation: pulse 1.4s infinite; }
 @keyframes pulse { 50% { opacity: 0.3; } }
 .live { max-width: 1000px; margin: 0 auto; }
-.live-bar { position: relative; display: flex; align-items: center; gap: 12px; background: var(--text); color: #fff; padding: 10px 16px 14px; border-radius: var(--radius); font-weight: 600; flex-wrap: wrap; overflow: hidden; }
-.live-of { font-size: 13px; color: #b3bac5; font-weight: 500; }
-.live-over { font-size: 12px; font-weight: 700; color: #172b4d; background: #ffc400; padding: 2px 8px; border-radius: 10px; }
-.live-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255, 255, 255, 0.14); display: flex; }
-.lp-planned { height: 100%; background: #4c9aff; transition: width 1s linear; }
-.lp-over { height: 100%; background: #ffab00; }
-.lp-mark { position: absolute; top: -3px; bottom: 0; width: 2px; background: #fff; transform: translateX(-1px); }
+.live-bar { position: relative; display: flex; align-items: center; gap: 12px; background: var(--text); color: #fff; padding: 10px 16px; border-radius: var(--radius); font-weight: 600; flex-wrap: wrap; overflow: hidden; }
 .live-timer { font-size: 22px; font-variant-numeric: tabular-nums; font-family: ui-monospace, Menlo, monospace; }
 .live-stage { margin-left: auto; }
 .demo-btn-dark { background: transparent !important; color: #ffe380 !important; border-color: rgba(255, 227, 128, 0.6) !important; }
@@ -403,7 +397,8 @@ span.rt-wide { display: contents; }
 
 /* "What happens next" under the lesson details */
 .plan-next { margin: 2px 0 0; font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: baseline; }
-.plan-next.is-mine { color: var(--blue-dark); font-weight: 600; background: var(--blue-bg); padding: 4px 10px; border-radius: 4px; margin-left: -2px; }
+.plan-next.is-mine { color: #5c3b07; font-weight: 600; background: var(--yellow-bg); border: 1px solid #ffe380; border-left: 3px solid #ffab00; padding: 5px 10px; border-radius: 4px; margin-left: -2px; }
+.plan-next.is-mine > span:first-child { color: #b65c02; }
 
 /* Title + lesson details in the header (replaces the "Om timen" card) */
 .plan-title { margin: 0; min-width: 0; }
@@ -653,5 +648,42 @@ label.btn { cursor: pointer; }
 .name-first { display: flex; flex-direction: column; gap: 8px; }
 .name-first .field { display: flex; flex-direction: column; gap: 4px; margin: 0; }
 .name-first .field label { font-size: 12px; font-weight: 600; color: #42526e; }
-.share-when { gap: 8px; align-items: flex-end; }
-.share-when .field { flex: 1; }
+
+/* Time picker: two scrolling columns (hours, minutes) with Nå / Ok */
+.tp { position: relative; display: inline-flex; }
+.tp-input { width: 84px; font-variant-numeric: tabular-nums; }
+.tp-pop { position: fixed; z-index: 70; width: 168px; background: #fff; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(9, 30, 66, 0.2); overflow: hidden; }
+.tp-cols { display: flex; height: 248px; }
+.tp-col { flex: 1; list-style: none; margin: 0; padding: 6px; overflow-y: auto; scrollbar-width: none; }
+.tp-col::-webkit-scrollbar { display: none; }
+.tp-col + .tp-col { border-left: 1px solid var(--border); }
+.tp-col button { width: 100%; height: 40px; border: 0; background: none; border-radius: 8px; font-size: 16px; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
+.tp-col button:hover { background: #f4f5f7; }
+.tp-col button.is-on { background: var(--blue-bg); color: var(--blue-dark); font-weight: 600; }
+.tp-foot { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-top: 1px solid var(--border); }
+.tp-now { border: 0; background: none; color: var(--blue); font-size: 14px; cursor: pointer; padding: 4px 2px; }
+.tp-now:hover { text-decoration: underline; }
+.meta-edit .tp-input { width: 84px; }
+
+/* Meeting link in the lesson details */
+.meeting-link { gap: 5px; color: var(--blue); font-weight: 500; text-decoration: none; }
+.meeting-link:hover { background: var(--blue-bg); text-decoration: underline; }
+.meeting-wrap { display: inline-flex; align-items: center; }
+.meeting-edit { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; }
+.meeting-edit:hover { color: var(--blue); }
+
+/* Access rights table in the share dialog */
+.rights { border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; background: #fafbfc; }
+.rights summary { cursor: pointer; font-weight: 600; font-size: 13px; color: var(--text); }
+.rights p { margin: 6px 0 0; }
+.rights-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12.5px; }
+.rights-table th, .rights-table td { padding: 5px 4px; border-bottom: 1px solid var(--border); }
+.rights-table thead th { font-size: 11px; font-weight: 700; color: #42526e; text-align: center; white-space: nowrap; }
+.rights-table tbody th { font-weight: 400; text-align: left; color: var(--text); }
+.rights-table td { text-align: center; width: 64px; font-weight: 700; }
+.rights-table td.is-yes { color: var(--green); }
+.rights-table td.is-no { color: #a5adba; }
+.rights-note { display: block; font-size: 11px; color: var(--muted); }
+@media (max-width: 520px) { .rights-table td { width: 44px; } .rights-table thead th { font-size: 10px; } }
+.rights-table .is-focus { background: var(--blue-bg); }
+.rights-table thead th.is-focus { color: var(--blue-dark); }

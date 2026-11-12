@@ -97,12 +97,12 @@ export function summaryAuthorOf(p: Plan, users: User[]): User | null {
 
 /** A new plan starts empty: the student sets date, time and duration. */
 export function emptyInfo(): PlanInfo {
-  return { title: "", className: "", subject: "", date: "", startTime: "", durationMin: 0 };
+  return { title: "", className: "", subject: "", date: "", startTime: "" };
 }
 
-/** What is still missing before the plan can be shared: a name, a date and a start time. */
-export function missingForShare(p: Plan): { title: boolean; when: boolean } {
-  return { title: !p.info.title.trim(), when: !p.info.date || !p.info.startTime };
+/** What is still missing before the plan can be shared: only a name (date and time are optional). */
+export function missingForShare(p: Plan): { title: boolean } {
+  return { title: !p.info.title.trim() };
 }
 
 
@@ -255,8 +255,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       deleteComment: (planId, commentId) => upd(planId, (p) => ({ ...p, comments: p.comments.filter((c) => c.id !== commentId) })),
       invite: (planId, userId, access) =>
         upd(planId, (p) =>
-          // No sharing without a name, date and start time.
-          missingForShare(p).title || missingForShare(p).when || p.participants.some((x) => x.userId === userId)
+          // No sharing without a name.
+          missingForShare(p).title || p.participants.some((x) => x.userId === userId)
             ? p
             : logged(
                 { ...p, participants: [...p.participants, { userId, access, invitedAt: nowIso(), seenAt: null }] },
@@ -273,7 +273,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })),
       startObservation: (planId) =>
         upd(planId, (p) =>
-          p.observations.some((o) => o.observerId === me.id)
+          // Only invited observers observe; the owner cannot observe their own plan.
+          accessOf(p, me.id) !== "observator" || p.observations.some((o) => o.observerId === me.id)
             ? p
             : logged(
                 {
@@ -346,7 +347,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       restartObservation: (planId) =>
         upd(planId, (p) => {
           const o = p.observations.find((x) => x.observerId === me.id);
-          if (!o?.endedAt || p.phase === "done") return p;
+          if (!o?.endedAt || p.phase === "done" || accessOf(p, me.id) !== "observator") return p;
           // Shift the start by the pause, so offsets of old and new notes stay on one lesson clock.
           const pauseMs = Date.now() - new Date(o.endedAt).getTime();
           const startedAt = new Date(new Date(o.startedAt).getTime() + pauseMs).toISOString();

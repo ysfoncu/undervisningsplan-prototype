@@ -14,10 +14,7 @@ const ACCESS: Access[] = ["leser", "redaktor", "observator"];
 export function People({ plan, editable }: { plan: Plan; editable: boolean }) {
   const { state, user, invite, setAccess, removeParticipant, saveInfo } = useStore();
   const [name, setName] = useState("");
-  const [date, setDate] = useState(plan.info.date);
-  const [time, setTime] = useState(plan.info.startTime);
-  const missing = missingForShare(plan);
-  const untitled = missing.title || missing.when;
+  const untitled = missingForShare(plan).title;
   const [q, setQ] = useState("");
   const [as, setAs] = useState<Access>("redaktor");
 
@@ -45,44 +42,23 @@ export function People({ plan, editable }: { plan: Plan; editable: boolean }) {
     return <span className="tone-yellow">{L.pInvited}</span>;
   };
 
-  // A plan cannot be shared without a name, date and start time: ask for what is missing here, then show the invite list.
-  const ready = (!missing.title || name.trim()) && (!missing.when || (date && time));
+  // A plan cannot be shared without a name: ask for it here, then show the invite list. Date and time are optional.
   const nameFirst = editable && untitled && (
     <form
       className="picker name-first"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!ready) return;
-        saveInfo(plan.id, {
-          ...plan.info,
-          ...(missing.title ? { title: name.trim() } : {}),
-          ...(missing.when ? { date, startTime: time } : {}),
-        });
+        if (name.trim()) saveInfo(plan.id, { ...plan.info, title: name.trim() });
       }}
     >
-      <span className="field-label">{missing.title && missing.when ? L.shareNeedsDetails : missing.title ? L.shareNeedsName : L.shareNeedsWhen}</span>
-      <p className="muted small">{missing.title && missing.when ? L.shareNeedsDetailsHint : missing.title ? L.shareNeedsNameHint : L.shareNeedsWhenHint}</p>
-      {missing.title && (
-        <div className="field">
-          <label htmlFor="share-name">{L.fTitle}</label>
-          <input id="share-name" autoFocus placeholder={L.fTitlePh} value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
-      )}
-      {missing.when && (
-        <div className="row share-when">
-          <div className="field">
-            <label htmlFor="share-date">{L.fDate}</label>
-            <input id="share-date" type="date" autoFocus={!missing.title} value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-          <div className="field">
-            <label htmlFor="share-time">{L.fTime}</label>
-            <input id="share-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-          </div>
-        </div>
-      )}
+      <label className="field-label" htmlFor="share-name">
+        {L.shareNeedsName}
+      </label>
+      <p className="muted small">{L.shareNeedsNameHint}</p>
       <div className="row">
-        <button className="btn btn-primary" type="submit" disabled={!ready}>
-          {missing.title && !missing.when ? L.shareSaveName : L.shareSaveDetails}
+        <input id="share-name" autoFocus placeholder={L.fTitlePh} value={name} onChange={(e) => setName(e.target.value)} />
+        <button className="btn btn-primary" type="submit" disabled={!name.trim()}>
+          {L.shareSaveName}
         </button>
       </div>
     </form>
@@ -130,6 +106,7 @@ export function People({ plan, editable }: { plan: Plan; editable: boolean }) {
     <div className="people-panel">
       {nameFirst}
       {picker}
+      <AccessRights open={editable} focus={editable && !untitled ? as : undefined} />
       <h3 className="people-h">{L.peopleWithAccess}</h3>
       <div className="people-list">
         <Person user={user(plan.ownerId)} sub={L.owner} />
@@ -167,5 +144,63 @@ export function People({ plan, editable }: { plan: Plan; editable: boolean }) {
         })}
       </div>
     </div>
+  );
+}
+
+type Who = "owner" | Access;
+const WHO: Who[] = ["owner", "leser", "redaktor", "observator"];
+/** What each access level may do. Mirrors the checks in PlanView, ObserveView and store. */
+const RIGHTS: { key: Exclude<keyof typeof L.rights, "title" | "yes" | "no" | "feedbackNote" | "after">; who: Who[] }[] = [
+  { key: "read", who: ["owner", "leser", "redaktor", "observator"] },
+  { key: "write", who: ["owner", "redaktor", "observator"] },
+  { key: "annotate", who: ["owner", "redaktor", "observator"] },
+  { key: "resolve", who: ["owner", "redaktor", "observator"] },
+  { key: "observe", who: ["observator"] },
+  { key: "media", who: ["owner", "observator"] },
+  { key: "react", who: ["owner", "leser", "redaktor", "observator"] },
+  { key: "feedback", who: ["observator"] },
+  { key: "manage", who: ["owner"] },
+];
+
+/** A small table explaining Eier / Leser / Redaktør / Observatør. */
+function AccessRights({ open, focus }: { open: boolean; focus?: Access }) {
+  return (
+    <details className="rights" open={open}>
+      <summary>{L.rights.title}</summary>
+      <table className="rights-table">
+        <thead>
+          <tr>
+            <th scope="col">
+              <span className="sr-only">{L.rights.title}</span>
+            </th>
+            {WHO.map((w) => (
+              <th key={w} scope="col" className={w === focus ? "is-focus" : ""}>
+                {w === "owner" ? L.owner : L.access[w]}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {RIGHTS.map((r) => (
+            <tr key={r.key}>
+              <th scope="row">
+                {L.rights[r.key]}
+                {r.key === "feedback" && <span className="rights-note">{L.rights.feedbackNote}</span>}
+              </th>
+              {WHO.map((w) => {
+                const ok = r.who.includes(w);
+                return (
+                  <td key={w} className={`${ok ? "is-yes" : "is-no"} ${w === focus ? "is-focus" : ""}`}>
+                    <span aria-hidden="true">{ok ? "✓" : "–"}</span>
+                    <span className="sr-only">{ok ? L.rights.yes : L.rights.no}</span>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="muted small">{L.rights.after}</p>
+    </details>
   );
 }

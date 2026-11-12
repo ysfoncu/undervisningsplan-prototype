@@ -18,7 +18,8 @@ export interface PlanInfo {
   subject: string;
   date: string; // YYYY-MM-DD
   startTime: string; // HH:MM
-  durationMin: number;
+  /** Optional video meeting (Zoom, Teams, Meet …), e.g. for remote observers. */
+  meetingUrl?: string;
 }
 
 export type AnnotationType = "highlight" | "strikeout" | "text";

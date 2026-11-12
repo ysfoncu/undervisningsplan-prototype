@@ -26,7 +26,7 @@ React 18, TypeScript, Vite 6 (same stack as the inspiration repo
 
 ## The model in one paragraph
 
-A plan has its lesson facts (title, subject, class, date, time, duration) in
+A plan has its lesson facts (title, subject, class, date, time, optional meeting link) in
 the page header, edited in place by the owner, and **one shared rich-text
 document**. There is no draft, no publish and no numbered versions: the owner,
 every **Redaktør** and every **Observatør** write in the same document **at the
@@ -45,7 +45,7 @@ marks the plan as completed; every edit is in Historikk. No approval step.
 
 1.  Open http://localhost:5199 in **two browser tabs**.
 2.  In tab 1 choose **Ingrid** ("Vis som" is per tab), click **+ Ny plan**,
-    and give it a name, date and start time. **Del** → invite Jonas as
+    and give it a name. **Del** → invite Jonas as
     *Redaktør*. In tab 2 choose **Jonas** and open the plan.
 3.  Type in either tab: the text, coloured cursors with names, and the
     "I planen nå" avatars update in the other tab at once.
@@ -72,7 +72,7 @@ never appears in the invite list.
 1.  **Ingrid → "+ Ny plan".** Type the title at the top, click *+ Fag* /
     *+ Klasse* / *+ Dato og tid* to fill in details, write the plan (it starts
     from a short template; click a grey prompt and type over it). Everything
-    saves as you type. **Del** (top right) invites people (a plan needs a name, date and start time first; the dialog asks for what is missing) as *Leser*,
+    saves as you type. **Del** (top right) invites people (a plan needs a name first; the dialog asks for it. Date and time are optional) as *Leser*,
     *Redaktør* or *Observatør*; the clock icon opens **Historikk**.
 2.  **Jonas** (second tab) opens the plan and writes in it while
     Ingrid writes too. He selects a phrase and adds a *Stryk* with a note.

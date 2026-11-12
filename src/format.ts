@@ -25,6 +25,37 @@ export function fmtLesson(date: string, time: string): string {
   return time ? `${day} kl. ${time.replace(":", ".")}` : day;
 }
 
+/**
+ * A meeting link as typed by the user → a safe https/http URL, or null.
+ * "zoom.us/j/123" becomes "https://zoom.us/j/123"; other schemes are refused.
+ */
+export function normalizeMeetingUrl(raw: string): string | null {
+  const v = raw.trim();
+  if (!v) return null;
+  try {
+    const u = new URL(/^[a-z][a-z0-9+.-]*:/i.test(v) ? v : `https://${v}`);
+    return (u.protocol === "https:" || u.protocol === "http:") && u.hostname.includes(".") ? u.href : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Short name of the meeting service for the link text. */
+export function meetingName(url: string): string {
+  let host = "";
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+  if (/(^|\.)zoom\.us$/.test(host)) return "Zoom";
+  if (/teams\.(microsoft|live)\.com$/.test(host)) return "Teams";
+  if (host === "meet.google.com") return "Google Meet";
+  if (/(^|\.)whereby\.com$/.test(host)) return "Whereby";
+  if (/(^|\.)webex\.com$/.test(host)) return "Webex";
+  return host;
+}
+
 export function fmtOffset(sec: number): string {
   const s = Math.max(0, Math.floor(sec));
   const m = Math.floor(s / 60);

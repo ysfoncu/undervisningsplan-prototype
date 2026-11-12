@@ -42,10 +42,7 @@ export function ObserveTab({ plan }: { plan: Plan }) {
 
         {canObserve && (
           <section className="card card-accent">
-            <p className="small muted">
-              {plan.info.title}
-              {plan.info.durationMin > 0 && <> · {fill(L.durationValue, { n: plan.info.durationMin })}</>}
-            </p>
+            <p className="small muted">{plan.info.title}</p>
             <button className="btn btn-primary btn-lg btn-block" onClick={() => {
                 startObservation(plan.id);
               }}>
@@ -116,9 +113,6 @@ function LiveObserver({ plan, obs }: { plan: Plan; obs: Observation }) {
   const annotations = useAnnotations(plan.id);
   const now = useNow();
   const elapsed = (now - new Date(obs.startedAt).getTime()) / 1000;
-  const hasDuration = plan.info.durationMin > 0;
-  const total = Math.max(1, plan.info.durationMin * 60);
-  const overtime = hasDuration && elapsed > total;
   const [kind, setKind] = useState<NoteKind>("styrke");
   const [text, setText] = useState("");
   const [showPlan, setShowPlan] = useState(false);
@@ -215,11 +209,6 @@ function LiveObserver({ plan, obs }: { plan: Plan; obs: Observation }) {
         <span className="live-timer" aria-label="Tid siden start">
           {fmtOffset(elapsed)}
         </span>
-        {overtime ? (
-          <span className="live-over">{fill(L.liveOvertimeBy, { t: fmtOffset(elapsed - total) })}</span>
-        ) : (
-          <span className="live-of">{hasDuration ? fill(L.liveOf, { n: plan.info.durationMin }) : L.liveNoDuration}</span>
-        )}
         <button className="demo-btn demo-btn-dark" title={L.demoForwardHint} onClick={() => fastForward(plan.id, 300)}>
           {L.demoForward}
         </button>
@@ -233,19 +222,6 @@ function LiveObserver({ plan, obs }: { plan: Plan; obs: Observation }) {
         >
           ■ {L.obsEnd}
         </button>
-        {/* Progress of the lesson. Past the planned time the planned part stays
-            blue, the extra time is amber, and a tick marks the planned end. */}
-        {hasDuration && <div className="live-progress" aria-hidden="true">
-          {overtime ? (
-            <>
-              <span className="lp-planned" style={{ width: `${(total / elapsed) * 100}%` }} />
-              <span className="lp-over" style={{ width: `${(1 - total / elapsed) * 100}%` }} />
-              <i className="lp-mark" style={{ left: `${(total / elapsed) * 100}%` }} />
-            </>
-          ) : (
-            <span className="lp-planned" style={{ width: `${(elapsed / total) * 100}%` }} />
-          )}
-        </div>}
       </div>
 
       {showInfo && (

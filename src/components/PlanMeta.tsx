@@ -1,7 +1,9 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import { fmtLesson } from "../format";
+import { fmtLesson, meetingName, normalizeMeetingUrl } from "../format";
 import { fill, L } from "../labels";
 import { useStore } from "../store";
+import { TimeField } from "./TimeField";
+import { Icon } from "./ui";
 import type { Plan, PlanInfo } from "../types";
 
 /**
@@ -49,7 +51,7 @@ export function TitleField({ plan, editable }: { plan: Plan; editable: boolean }
   );
 }
 
-type Key = "subject" | "className" | "when" | "duration";
+type Key = "subject" | "className" | "when" | "meeting";
 
 export function MetaRow({ plan, editable }: { plan: Plan; editable: boolean }) {
   const c = plan.info;
@@ -57,7 +59,7 @@ export function MetaRow({ plan, editable }: { plan: Plan; editable: boolean }) {
     { key: "subject", label: L.fSubject, value: c.subject || null },
     { key: "className", label: L.fClass, value: c.className || null },
     { key: "when", label: L.fDateTime, value: c.date ? fmtLesson(c.date, c.startTime) + (c.startTime ? "" : ` · ${L.fTime.toLowerCase()} ?`) : null },
-    { key: "duration", label: L.fDurationShort, value: c.durationMin ? fill(L.durationValue, { n: c.durationMin }) : null },
+    { key: "meeting", label: L.fMeeting, value: c.meetingUrl || null },
   ];
   const shown = editable ? items : items.filter((i) => i.value);
   if (!shown.length) return null;
@@ -73,6 +75,8 @@ export function MetaRow({ plan, editable }: { plan: Plan; editable: boolean }) {
           )}
           {editable ? (
             <MetaEditor plan={plan} k={i.key} label={i.label} value={i.value} />
+          ) : i.key === "meeting" && i.value ? (
+            <MeetingLink url={i.value} />
           ) : (
             <span className="meta-item" title={i.label}>
               {i.value}
@@ -84,18 +88,40 @@ export function MetaRow({ plan, editable }: { plan: Plan; editable: boolean }) {
   );
 }
 
+/** The meeting link, opened in a new tab. */
+function MeetingLink({ url }: { url: string }) {
+  return (
+    <a className="meta-item meeting-link" href={url} target="_blank" rel="noopener noreferrer" title={`${L.meetingJoinTitle}: ${url}`}>
+      <Icon name="video" size={15} /> {fill(L.meetingJoin, { name: meetingName(url) })}
+    </a>
+  );
+}
+
 function MetaEditor({ plan, k, label, value }: { plan: Plan; k: Key; label: string; value: string | null }) {
   const { saveInfo } = useStore();
   const [open, setOpen] = useState(false);
   const [d, setD] = useState<PlanInfo>(plan.info);
+  const [link, setLink] = useState(plan.info.meetingUrl ?? "");
+  const linkBad = k === "meeting" && link.trim() !== "" && !normalizeMeetingUrl(link);
   const box = useRef<HTMLSpanElement>(null);
 
   const start = () => {
     setD(plan.info);
+    setLink(plan.info.meetingUrl ?? "");
     setOpen(true);
   };
-  const commit = () => {
-    saveInfo(plan.id, { ...plan.info, subject: d.subject.trim(), className: d.className.trim(), date: d.date, startTime: d.startTime, durationMin: d.durationMin > 0 ? Math.round(d.durationMin) : plan.info.durationMin });
+  const commit = (fromBlur = false) => {
+    if (k === "meeting") {
+      // An invalid link is not saved: Enter keeps the editor open, leaving the field discards it.
+      if (linkBad) {
+        if (fromBlur) setOpen(false);
+        return;
+      }
+      saveInfo(plan.id, { ...plan.info, meetingUrl: normalizeMeetingUrl(link) ?? "" });
+      setOpen(false);
+      return;
+    }
+    saveInfo(plan.id, { ...plan.info, subject: d.subject.trim(), className: d.className.trim(), date: d.date, startTime: d.startTime });
     setOpen(false);
   };
   const keys = (e: React.KeyboardEvent) => {
@@ -104,8 +130,18 @@ function MetaEditor({ plan, k, label, value }: { plan: Plan; k: Key; label: stri
   };
   // Commit when focus leaves the whole editor (date + time count as one).
   const onBlur = (e: React.FocusEvent) => {
-    if (!box.current?.contains(e.relatedTarget as Node)) commit();
+    if (!box.current?.contains(e.relatedTarget as Node)) commit(true);
   };
+
+  if (!open && k === "meeting" && value)
+    return (
+      <span className="meeting-wrap">
+        <MeetingLink url={value} />
+        <button className="icon-btn meeting-edit" onClick={start} title={fill(L.metaEdit, { field: label.toLowerCase() })} aria-label={`${label}: ${value}. ${L.edit}`}>
+          <Icon name="edit" size={14} />
+        </button>
+      </span>
+    );
 
   if (!open)
     return (
@@ -119,18 +155,29 @@ function MetaEditor({ plan, k, label, value }: { plan: Plan; k: Key; label: stri
     fields = <input autoFocus aria-label={L.fSubject} placeholder={L.fSubjectPh} value={d.subject} onChange={(e) => setD({ ...d, subject: e.target.value })} onKeyDown={keys} style={{ width: 160 }} />;
   else if (k === "className")
     fields = <input autoFocus aria-label={L.fClass} placeholder={L.fClassPh} value={d.className} onChange={(e) => setD({ ...d, className: e.target.value })} onKeyDown={keys} style={{ width: 90 }} />;
-  else if (k === "when")
+  else if (k === "meeting")
     fields = (
       <>
-        <input autoFocus type="date" aria-label={L.fDate} value={d.date} onChange={(e) => setD({ ...d, date: e.target.value })} onKeyDown={keys} />
-        <input type="time" aria-label={L.fTime} value={d.startTime} onChange={(e) => setD({ ...d, startTime: e.target.value })} onKeyDown={keys} />
+        <input
+          autoFocus
+          type="url"
+          inputMode="url"
+          aria-label={L.fMeeting}
+          aria-invalid={linkBad}
+          placeholder={L.fMeetingPh}
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          onKeyDown={keys}
+          style={{ width: 300 }}
+        />
+        {linkBad && <span className="small tone-red">{L.meetingInvalid}</span>}
       </>
     );
   else
     fields = (
       <>
-        <input autoFocus type="number" min={5} max={240} step={5} aria-label={L.fDuration} value={d.durationMin || ""} placeholder="45" onChange={(e) => setD({ ...d, durationMin: Number(e.target.value) })} onKeyDown={keys} style={{ width: 72 }} />
-        <span className="muted small">min</span>
+        <input autoFocus type="date" aria-label={L.fDate} value={d.date} onChange={(e) => setD({ ...d, date: e.target.value })} onKeyDown={keys} />
+        <TimeField label={L.fTime} value={d.startTime} onChange={(v) => setD({ ...d, startTime: v })} onKeyDown={keys} />
       </>
     );
 

@@ -108,7 +108,7 @@ export function Empty({ children }: { children: ReactNode }) {
 
 // ─── Icons (inline SVG, inherit colour) ─────────────────────────────────────
 
-export function Icon({ name, size = 20 }: { name: "share" | "history" | "close" | "send" | "comment" | "trash" | "edit" | "smile"; size?: number }) {
+export function Icon({ name, size = 20 }: { name: "share" | "history" | "close" | "send" | "comment" | "trash" | "edit" | "smile" | "video"; size?: number }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
   if (name === "share")
     return (
@@ -138,6 +138,13 @@ export function Icon({ name, size = 20 }: { name: "share" | "history" | "close" 
         <path d="M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1z" />
         <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
         <path d="M10 11v6M14 11v6" />
+      </svg>
+    );
+  if (name === "video")
+    return (
+      <svg {...common}>
+        <rect x="2.5" y="6" width="13" height="12" rx="2" />
+        <path d="M15.5 10.5l6-3.5v10l-6-3.5" />
       </svg>
     );
   if (name === "smile")

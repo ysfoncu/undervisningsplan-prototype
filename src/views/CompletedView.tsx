@@ -47,7 +47,6 @@ export function CompletedView({ plan }: { plan: Plan }) {
             <dt>{L.report.lesson}</dt>
             <dd>
               {c.date ? fmtLesson(c.date, c.startTime) : L.emptyValue}
-              {c.durationMin > 0 && <> · {fill(L.durationValue, { n: c.durationMin })}</>}
             </dd>
           </div>
           <div>

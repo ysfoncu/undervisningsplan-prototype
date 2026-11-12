@@ -12,7 +12,7 @@ export function nextAction(p: Plan, me: User, users: User[]): { text: string; mi
   if (access === "owner") {
     switch (s) {
       case "draft":
-        return { text: !p.info.date || !p.info.startTime ? L.next.studentNeedsWhen : L.next.studentDraft, mine: true };
+        return { text: L.next.studentDraft, mine: true };
       case "published": {
         const open = p.openCount;
         return { text: open ? fill(L.next.studentOpen, { n: open }) : L.next.studentOpenNone, mine: open > 0 };
@@ -33,7 +33,7 @@ export function nextAction(p: Plan, me: User, users: User[]): { text: string; mi
   if (access === "observator") {
     const myObs = p.observations.find((o) => o.observerId === me.id);
     if (myObs && !myObs.endedAt) return { text: L.next.observerLive, mine: true };
-    if (s === "published" || (s === "observing" && !myObs)) return { text: fill(L.next.observer, { when }), mine: true };
+    if (s === "published" || (s === "observing" && !myObs)) return { text: when ? fill(L.next.observer, { when }) : L.next.observerNoWhen, mine: true };
     if (s === "awaitingSummary" && summaryAuthorOf(p, users)?.id === me.id) return { text: L.next.observerSummary, mine: true };
   }
   return { text: "", mine: false };
